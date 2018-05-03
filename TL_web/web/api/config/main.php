@@ -13,8 +13,27 @@ return [
     'controllerNamespace' => 'frontend\controllers',
     'components' => [
         'request' => [
-            'csrfParam' => '_csrf-frontend',
+            'csrfParam' => '_csrf-api',
+            'parsers' => [
+                'application/json' => 'yii\web\JsonParser',
+            ]
         ],
+        'response' => [
+            'class' => 'yii\web\Response',
+            'on beforeSend' => function ($event) {
+                $response = $event->sender;
+                if ($response->data !== null) {
+                    $response->data = [
+                        'success' => $response->isSuccessful,
+                        'data' => $response->data,
+                    ];
+                    $response->statusCode = 200;
+                }
+            },
+            'format' => \yii\web\Response::FORMAT_JSON,
+            'charset' => 'UTF-8',
+        ],
+                    
         'user' => [
             'identityClass' => 'common\models\User',
             'enableAutoLogin' => true,
@@ -22,7 +41,7 @@ return [
         ],
         'session' => [
             // this is the name of the session cookie used for login on the frontend
-            'name' => 'advanced-frontend',
+            'name' => 'api',
         ],
         'log' => [
             'traceLevel' => YII_DEBUG ? 3 : 0,
@@ -33,17 +52,23 @@ return [
                 ],
             ],
         ],
-        'errorHandler' => [
-            'errorAction' => 'site/error',
-        ],
-        
+//        'errorHandler' => [
+//            'errorAction' => 'site/error',
+//        ],
         'urlManager' => [
             'enablePrettyUrl' => true,
+            'enableStrictParsing' => true,
             'showScriptName' => false,
             'rules' => [
+                //Chinchilla Match application.
+                ['class' => 'yii\rest\UrlRule', 'controller' => 'v1/chinchillaMatch/profile', 'except'=>['delete']],
             ],
         ],
-        
+    ],
+    'modules' => [
+        'v1' => [
+            'class' => 'api\modules\v1\Module'
+        ]
     ],
     'params' => $params,
 ];

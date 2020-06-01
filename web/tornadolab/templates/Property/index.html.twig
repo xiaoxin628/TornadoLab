@@ -1,0 +1,9 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+	{% for stat in stats %}
+		{{dump(stat)}}
+		{{ stat.suburb.name }} - {{ stat.count}} 
+		{# {{ stat. }} #}
+	{% endfor %}
+{% endblock %}
